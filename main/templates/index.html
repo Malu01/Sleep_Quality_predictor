@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sleep Predictor | SRS Project</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --primary: #6a5acd;
+        --primary-light: #8a7be0;
+        --bg: #f0f2f8;
+        --white: #ffffff;
+        --text: #333;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(106, 90, 205, 0.15);
+        width: 100%;
+        max-width: 500px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+      }
+
+      h2 {
+        color: var(--primary);
+        text-align: center;
+        font-weight: 600;
+        margin-bottom: 30px;
+      }
+
+      .input-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .input-group {
+        margin-bottom: 20px;
+      }
+      .full-width {
+        grid-column: span 2;
+      }
+
+      label {
+        font-size: 13px;
+        color: #666;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #eee;
+        border-radius: 12px;
+        transition: 0.3s;
+        outline: none;
+        box-sizing: border-box;
+        font-family: inherit;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--primary);
+      }
+
+      textarea {
+        resize: none;
+        height: 80px;
+      }
+
+      .btn-predict {
+        width: 100%;
+        padding: 16px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.4s;
+        margin-top: 10px;
+      }
+
+      .btn-predict:hover {
+        background: var(--primary-light);
+        transform: translateY(-2px);
+      }
+
+      .btn-reset {
+        width: 100%;
+        padding: 12px;
+        background: #e0e0e0;
+        color: #444;
+        border: none;
+        border-radius: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 10px;
+      }
+
+      .btn-reset:hover {
+        background: #d0d0d0;
+      }
+
+      #output-card {
+        margin-top: 25px;
+        padding: 20px;
+        border-radius: 15px;
+        display: none;
+        animation: slideUp 0.5s ease;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .result-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+      .result-detail {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+      .tip-box {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        font-size: 13px;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>🌙 Sleep Predictor</h2>
+
+      <div class="input-grid">
+        <div class="input-group">
+          <label>Sleep Duration (Hrs)</label>
+          <input
+            type="number"
+            id="duration"
+            placeholder="e.g. 7.5"
+            step="0.1"
+          />
+        </div>
+
+        <div class="input-group">
+          <label>Activity (Mins)</label>
+          <input type="number" id="exercise" placeholder="e.g. 30" />
+        </div>
+
+        <div class="input-group">
+          <label>Caffeine Level</label>
+          <select id="caffeine">
+            <option value="0">None</option>
+            <option value="1">Low</option>
+            <option value="2">Moderate</option>
+            <option value="3">High</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Mood Level</label>
+          <select id="mood">
+            <option value="3">Happy</option>
+            <option value="2">Neutral</option>
+            <option value="0">Tired/Sad</option>
+          </select>
+        </div>
+
+        <div class="input-group full-width">
+          <label>Stress Level (0-10)</label>
+          <input type="range" id="stress" min="0" max="10" value="5" />
+        </div>
+
+        <div class="input-group full-width">
+          <label>Sleep Diary (How was your night?)</label>
+          <textarea
+            id="diary"
+            placeholder="e.g. I felt rested and calm..."
+          ></textarea>
+        </div>
+      </div>
+
+      <button class="btn-predict" onclick="getPrediction()">
+        Predict Quality
+      </button>
+      <button class="btn-reset" onclick="resetForm()">Reset All</button>
+
+      <div id="output-card">
+        <div class="result-title" id="res-text"></div>
+        <div class="result-detail" id="res-sentiment"></div>
+        <div class="tip-box" id="res-tip"></div>
+      </div>
+    </div>
+
+    <script>
+      async function getPrediction() {
+        const outputCard = document.getElementById("output-card");
+
+        const formData = {
+          duration: document.getElementById("duration").value,
+          exercise: document.getElementById("exercise").value,
+          stress: document.getElementById("stress").value,
+          caffeine: document.getElementById("caffeine").value,
+          mood: document.getElementById("mood").value,
+          diary: document.getElementById("diary").value,
+        };
+
+        if (!formData.duration || !formData.exercise) {
+          alert("Please fill in the Sleep Duration and Activity!");
+          return;
+        }
+
+        try {
+          const response = await fetch("/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          });
+
+          const data = await response.json();
+          outputCard.style.display = "block";
+
+          if (data.result === "Good") {
+            outputCard.style.background = "#e8f5e9";
+            outputCard.style.color = "#2e7d32";
+            document.getElementById("res-text").innerHTML =
+              "✨ Result: Good Sleep";
+          } else if (data.result === "Average") {
+            outputCard.style.background = "#fff3e0";
+            outputCard.style.color = "#ef6c00";
+            document.getElementById("res-text").innerHTML =
+              "⚖️ Result: Average Sleep";
+          } else {
+            outputCard.style.background = "#ffebee";
+            outputCard.style.color = "#c62828";
+            document.getElementById("res-text").innerHTML =
+              "⚠️ Result: Poor Sleep";
+          }
+
+          document.getElementById("res-sentiment").innerHTML =
+            `Diary Mood: ${data.sentiment}`;
+          document.getElementById("res-tip").innerHTML = `💡 Tip: ${data.tip}`;
+        } catch (error) {
+          alert("Server Error! Make sure app.py is running.");
+        }
+      }
+
+      function resetForm() {
+        // Clear all text and number inputs
+        document.getElementById("duration").value = "";
+        document.getElementById("exercise").value = "";
+        document.getElementById("diary").value = "";
+
+        // Reset dropdowns to first/default option
+        document.getElementById("caffeine").value = "0";
+        document.getElementById("mood").value = "3";
+
+        // Reset range slider to middle value
+        document.getElementById("stress").value = 5;
+
+        // Hide output result
+        document.getElementById("output-card").style.display = "none";
+      }
+    </script>
+  </body>
+</html>
